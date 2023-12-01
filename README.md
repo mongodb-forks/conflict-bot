@@ -24,6 +24,8 @@ Create a Personal Access Token: Generate a personal access token with the necess
 
 Save the access token in your Actions Repository Secrets under the name `CONFLICT_BOT_ACCESS_TOKEN`.
 
+Alternatively, if the default `GITHUB_TOKEN` for your repository has sufficient permissions then you do not need to create a new access token. You can specify the `secrets.GITHUB_TOKEN` instead.
+
 Add the Action to Your Repository: Create a new workflow file (.yml) in the .github/workflows directory of your repository and add the configuration for ConflictBot.
 
 ##### Here is a basic setup for your GitHub Action workflow:
@@ -43,7 +45,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run PR Conflict Checker
-        uses: ConflictBot/ConflictBot@v1
+        uses: mongodb-forks/conflict-bot@v1.1
         with:
           github-token: ${{ secrets.CONFLICT_BOT_ACCESS_TOKEN }}
           main-branch: main
