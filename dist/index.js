@@ -9979,12 +9979,11 @@ async function setup() {
     core.info(`Fetching branch: ${mainBranch}`);
     execSync(`git fetch origin ${mainBranch}:${mainBranch}`);
 
+    // Fetch PR branches into temporary refs
+    execSync(`git remote add prSource ${variables.get("pullRequestHeadUrl")}`);
     core.info(
         execSync(`git config --list`, { encoding: "utf8" }),
     );
-
-    // Fetch PR branches into temporary refs
-    execSync(`git remote add prSource ${variables.get("pullRequestHeadUrl")}`);
     execSync(
       `git fetch prSource ${pullRequestBranch}:refs/remotes/prSource/tmp_${pullRequestBranch}`
     );
