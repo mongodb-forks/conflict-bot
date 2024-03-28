@@ -82,10 +82,13 @@ async function setup() {
   const pullRequestBranch = variables.get("pullRequestBranch");
 
   try {
+    core.info("Configuring local git repository");
+
     // Configure Git with a dummy user identity
     execSync(`git config user.email "action@github.com"`);
     execSync(`git config user.name "GitHub Action"`);
 
+    core.info(`Fetching branch: ${mainBranch}`);
     execSync(`git fetch origin ${mainBranch}:${mainBranch}`);
 
     // Fetch PR branches into temporary refs
@@ -294,7 +297,11 @@ async function attemptMerge(otherPullRequestBranch) {
     debug(
       `Attempting to merge #${otherPullRequestBranch} into #${pullRequestBranch}`
     );
+    core.info(
+      `Attempting to merge #${otherPullRequestBranch} into #${pullRequestBranch}`
+    );
 
+    core.info(`Fetching branch: ${otherPullRequestBranch}`);
     execSync(
       `git fetch origin ${otherPullRequestBranch}:refs/remotes/origin/tmp_${otherPullRequestBranch}`
     );
