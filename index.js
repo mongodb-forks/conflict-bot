@@ -5,7 +5,7 @@ const readFileSync = require("fs").readFileSync;
 
 const execSyncOrig = execSync;
 execSync = function execSync() {
-    core.info(`Exec’ing: ${arguments}`);
+    core.info(`Exec’ing: ${[...arguments]}`);
     return execSyncOrig.apply(this, arguments);
 };
 
