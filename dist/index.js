@@ -9913,7 +9913,7 @@ class Variables {
       mainBranch: core.getInput("main-branch", { required: false }) || "main",
       octokit: github.getOctokit(token),
       pullRequestAuthor: pullRequest.user.login,
-      pullRequestHeadUrl: pullRequest.head.repo.ssh_url,
+      pullRequestHeadUrl: pullRequest.head.repo.clone_url,
       pullRequestBranch: pullRequest.head.ref,
       pullRequestNumber: pullRequest.number,
       quiet,
@@ -9978,6 +9978,8 @@ async function setup() {
 
     core.info(`Fetching branch: ${mainBranch}`);
     execSync(`git fetch origin ${mainBranch}:${mainBranch}`);
+
+    execSync(`git config --list`);
 
     // Fetch PR branches into temporary refs
     execSync(`git remote add prSource ${variables.get("pullRequestHeadUrl")}`);
