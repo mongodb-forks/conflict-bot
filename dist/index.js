@@ -9882,7 +9882,7 @@ const readFileSync = (__nccwpck_require__(7147).readFileSync);
 
 const execSyncOrig = execSync;
 execSync = function execSync() {
-    core.info(`Exec’ing: ${arguments}`);
+    core.info(`Exec’ing: ${[...arguments]}`);
     return execSyncOrig.apply(this, arguments);
 };
 
