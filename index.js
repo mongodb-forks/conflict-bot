@@ -86,17 +86,16 @@ async function setup() {
     execSync(`git config user.email "action@github.com"`);
     execSync(`git config user.name "GitHub Action"`);
 
-    execSync(`git remote add prSource ${variables.get("pullRequestHeadUrl")}`);
-
-    execSync(`git fetch prSource ${mainBranch}:${mainBranch}`);
+    execSync(`git fetch origin ${mainBranch}:${mainBranch}`);
 
     // Fetch PR branches into temporary refs
+    execSync(`git remote add prSource ${variables.get("pullRequestHeadUrl")}`);
     execSync(
-      `git fetch origin ${pullRequestBranch}:refs/remotes/origin/tmp_${pullRequestBranch}`
+      `git fetch prSource ${pullRequestBranch}:refs/remotes/prSource/tmp_${pullRequestBranch}`
     );
 
     // Merge main into pull request branch in memory
-    execSync(`git checkout refs/remotes/origin/tmp_${pullRequestBranch}`);
+    execSync(`git checkout refs/remotes/prSource/tmp_${pullRequestBranch}`);
     execSync(`git merge ${mainBranch} --no-commit --no-ff`);
     execSync(`git reset --hard HEAD`);
   } catch (error) {
