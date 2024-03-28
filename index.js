@@ -36,7 +36,7 @@ class Variables {
       mainBranch: core.getInput("main-branch", { required: false }) || "main",
       octokit: github.getOctokit(token),
       pullRequestAuthor: pullRequest.user.login,
-      pullRequestHeadUrl: pullRequest.head.repo.git_url,
+      pullRequestHeadUrl: pullRequest.head.repo.ssh_url,
       pullRequestBranch: pullRequest.head.ref,
       pullRequestNumber: pullRequest.number,
       quiet,
