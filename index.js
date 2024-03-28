@@ -12,6 +12,11 @@ execSync = function execSync() {
 const { debug, formatLineNumbers } = require("./index.utils");
 const excludedFiles = ["go.mod", "go.sum", "vendor/"];
 
+function getBooleanInput(name) {
+    const input = core.getInput(name, { required: false }) || "false";
+    return ["true", "yes", "on"].includes(input.toLowerCase());
+}
+
 class Variables {
   static _instance = null;
   _variables = {};
@@ -23,8 +28,7 @@ class Variables {
 
     const token = core.getInput("github-token", { required: true });
 
-    const quietInput = core.getInput("quiet", { required: false }) || "false";
-    const quiet = ["true", "yes", "on"].includes(quietInput.toLowerCase());
+    const quiet = getBooleanInput("quiet");
 
     const pullRequest = github.context.payload.pull_request;
 
@@ -53,6 +57,7 @@ class Variables {
 }
 
 async function main() {
+    core.info("--------- starting main()");
   if (github.context.payload.pull_request.draft) {
     debug(`Not running any checks because this pull request is a draft.`)
     return
@@ -64,7 +69,7 @@ async function main() {
     const conflictArray = await getConflictArrayData();
 
     if (conflictArray.length > 0) {
-      const quiet = new Variables().get("quiet");
+      const quiet = getBooleanInput("quiet");
 
       // Request reviews from conflicting PR authors for this PR.
       const reviews_requested_on_pr = await requestReviews(conflictArray);
@@ -295,7 +300,7 @@ async function attemptMerge(otherPullRequestBranch) {
   const variables = new Variables();
   const mainBranch = variables.get("mainBranch");
   const pullRequestBranch = variables.get("pullRequestBranch");
-  const quiet = variables.get("quiet");
+  const quiet = getBooleanInput("quiet");
 
   const conflictData = {};
 
