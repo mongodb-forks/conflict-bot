@@ -26,6 +26,7 @@ class Variables {
       mainBranch: core.getInput("main-branch", { required: false }) || "main",
       octokit: github.getOctokit(token),
       pullRequestAuthor: pullRequest.user.login,
+      pullRequestHeadUrl: pullRequest.head.repo.clone_url,
       pullRequestBranch: pullRequest.head.ref,
       pullRequestNumber: pullRequest.number,
       quiet,
@@ -85,7 +86,9 @@ async function setup() {
     execSync(`git config user.email "action@github.com"`);
     execSync(`git config user.name "GitHub Action"`);
 
-    execSync(`git fetch origin ${mainBranch}:${mainBranch}`);
+    execSync(`git remote add prSource ${variables.get("pullRequestHeadUrl")}`);
+
+    execSync(`git fetch prSource ${mainBranch}:${mainBranch}`);
 
     // Fetch PR branches into temporary refs
     execSync(
