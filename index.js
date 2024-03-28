@@ -63,6 +63,8 @@ async function main() {
     return
   }
 
+  throw "dummy";
+
   try {
     await setup();
 
