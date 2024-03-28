@@ -88,6 +88,8 @@ async function setup() {
     execSync(`git config user.email "action@github.com"`);
     execSync(`git config user.name "GitHub Action"`);
 
+    throw "I am here!!";
+
     core.info(`Fetching branch: ${mainBranch}`);
     execSync(`git fetch origin ${mainBranch}:${mainBranch}`);
 
