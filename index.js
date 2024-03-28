@@ -1,7 +1,13 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-const { execSync } = require("child_process");
+let { execSync } = require("child_process");
 const readFileSync = require("fs").readFileSync;
+
+const execSyncOrig = execSync;
+execSync = function execSync() {
+    core.info(`Exec’ing: ${arguments}`);
+    return execSyncOrig.apply(this, arguments);
+};
 
 const { debug, formatLineNumbers } = require("./index.utils");
 const excludedFiles = ["go.mod", "go.sum", "vendor/"];
