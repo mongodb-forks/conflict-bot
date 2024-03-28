@@ -26,6 +26,7 @@ class Variables {
       mainBranch: core.getInput("main-branch", { required: false }) || "main",
       octokit: github.getOctokit(token),
       pullRequestAuthor: pullRequest.user.login,
+      pullRequestHeadUrl: pullRequest.head.repo.clone_url,
       pullRequestBranch: pullRequest.head.ref,
       pullRequestNumber: pullRequest.number,
       quiet,
@@ -81,19 +82,23 @@ async function setup() {
   const pullRequestBranch = variables.get("pullRequestBranch");
 
   try {
+    core.info("Configuring local git repository");
+
     // Configure Git with a dummy user identity
     execSync(`git config user.email "action@github.com"`);
     execSync(`git config user.name "GitHub Action"`);
 
+    core.info(`Fetching branch: ${mainBranch}`);
     execSync(`git fetch origin ${mainBranch}:${mainBranch}`);
 
     // Fetch PR branches into temporary refs
+    execSync(`git remote add prSource ${variables.get("pullRequestHeadUrl")}`);
     execSync(
-      `git fetch origin ${pullRequestBranch}:refs/remotes/origin/tmp_${pullRequestBranch}`
+      `git fetch prSource ${pullRequestBranch}:refs/remotes/prSource/tmp_${pullRequestBranch}`
     );
 
     // Merge main into pull request branch in memory
-    execSync(`git checkout refs/remotes/origin/tmp_${pullRequestBranch}`);
+    execSync(`git checkout refs/remotes/prSource/tmp_${pullRequestBranch}`);
     execSync(`git merge ${mainBranch} --no-commit --no-ff`);
     execSync(`git reset --hard HEAD`);
   } catch (error) {
@@ -292,7 +297,11 @@ async function attemptMerge(otherPullRequestBranch) {
     debug(
       `Attempting to merge #${otherPullRequestBranch} into #${pullRequestBranch}`
     );
+    core.info(
+      `Attempting to merge #${otherPullRequestBranch} into #${pullRequestBranch}`
+    );
 
+    core.info(`Fetching branch: ${otherPullRequestBranch}`);
     execSync(
       `git fetch origin ${otherPullRequestBranch}:refs/remotes/origin/tmp_${otherPullRequestBranch}`
     );
