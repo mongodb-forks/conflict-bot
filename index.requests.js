@@ -30,7 +30,7 @@ class Variables {
       repo: github.context.repo,
       token,
       isFork: pullRequest.head.repo.fork,
-      headRepo: pullRequest.head.repo.full_name,
+      pullRequestHeadUrl: pullRequest.head.repo.clone_url,
     };
 
     Variables._instance = this;
@@ -84,7 +84,7 @@ async function getOpenPullRequests() {
         title: pr.title,
         reviewers: await getAllReviewers(pr.number),
         isFork: pr.head.repo.fork,
-        repo: pr.head.repo.full_name,
+        pullRequestHeadUrl: pr.head.repo.clone_url,
       })
     }
 
