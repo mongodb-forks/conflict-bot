@@ -111,7 +111,7 @@ async function getConflictArrayData() {
         title: otherPullRequest.title,
         reviewers: otherPullRequest.reviewers,
       });
-    } 
+    }
   }
 
   return conflictArray;
@@ -189,7 +189,7 @@ async function attemptMerge(otherPullRequest) {
         `git merge refs/remotes/origin/conflictbot_tmp_${pullRequestBranch} --no-commit --no-ff`
       );
 
-      debug(`${otherPullRequest.branch} merge successful. No conflicts found.`);
+      debug(`${otherPullRequest.branch} merge successful. No conflicts found`);
     } catch (mergeError) {
       const stdoutStr = mergeError.stdout.toString();
       if (stdoutStr.includes("Automatic merge failed")) {
