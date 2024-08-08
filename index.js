@@ -19,13 +19,19 @@ async function main() {
     return
   }
 
+  const variables = new Variables();
+  if (variables.get("isFork")) {
+    debug(`Not running any checks because this pull request is from a fork`)
+    return
+  }
+
   try {
     await setup();
 
     const conflictArray = await getConflictArrayData();
 
     if (conflictArray.length > 0) {
-      const quiet = new Variables().get("quiet");
+      const quiet = variables.get("quiet");
 
       // Request reviews from conflicting PR authors for this PR.
       const reviews_requested_on_pr = await requestReviews(conflictArray);
