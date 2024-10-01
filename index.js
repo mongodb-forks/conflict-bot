@@ -1,9 +1,8 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-const { execSync } = require("child_process");
 const readFileSync = require("fs").readFileSync;
 
-const { debug } = require("./index.utils");
+const { debug, runCommand } = require("./index.utils");
 const {
   Variables,
   getOpenPullRequests,
@@ -58,33 +57,33 @@ async function setup() {
 
   try {
     // Configure Git with a dummy user identity.
-    execSync(`git config user.email "action@github.com"`);
-    execSync(`git config user.name "GitHub Action"`);
+    runCommand(`git config user.email "action@github.com"`);
+    runCommand(`git config user.name "GitHub Action"`);
 
     debug(`Fetching branch: ${mainBranch}`);
 
-    execSync(`git fetch origin ${mainBranch}:${mainBranch}`);
+    runCommand(`git fetch origin ${mainBranch}:${mainBranch}`);
 
     debug(`Fetching branch: ${pullRequestBranch}`);
 
     // Fetch PR branches into temporary refs.
     if (variables.get("isFork")) {
-      execSync(
+      runCommand(
         `git remote add ${pullRequestAuthor} ${pullRequestHeadUrl}`
       );
-      execSync(
+      runCommand(
         `git fetch ${pullRequestAuthor} ${pullRequestBranch}:refs/remotes/origin/conflictbot_tmp_${pullRequestBranch}`
       );
     } else {
-      execSync(
+      runCommand(
         `git fetch origin ${pullRequestBranch}:refs/remotes/origin/conflictbot_tmp_${pullRequestBranch}`
       );
     } 
 
     // Merge main into pull request branch in memory.
-    execSync(`git checkout refs/remotes/origin/conflictbot_tmp_${pullRequestBranch}`);
-    execSync(`git merge ${mainBranch} --no-commit --no-ff`);
-    execSync(`git reset --hard HEAD`);
+    runCommand(`git checkout refs/remotes/origin/conflictbot_tmp_${pullRequestBranch}`);
+    runCommand(`git merge ${mainBranch} --no-commit --no-ff`);
+    runCommand(`git reset --hard HEAD`);
   } catch (error) {
     console.error(`Error during setup: ${error.message}`);
     throw error;
@@ -168,30 +167,30 @@ async function attemptMerge(otherPullRequest) {
     if (otherPullRequest.isFork) {
       // This is in another try catch because we may have already added this remote.
       try {
-        execSync(
+        runCommand(
           `git remote add ${otherPullRequest.author} ${otherPullRequest.pullRequestHeadUrl}`
         );
       } catch(error) {
         console.log(error)
       }
 
-      execSync(
+      runCommand(
         `git fetch ${otherPullRequest.author} ${otherPullRequest.branch}:refs/remotes/origin/conflictbot_tmp_${otherPullRequest.branch}`
       );
     } else {
-      execSync(
+      runCommand(
         `git fetch origin ${otherPullRequest.branch}:refs/remotes/origin/conflictbot_tmp_${otherPullRequest.branch}`
       );
     }
 
     // Merge main into other pull request in memory.
-    execSync(`git checkout refs/remotes/origin/conflictbot_tmp_${otherPullRequest.branch}`);
-    execSync(`git merge ${mainBranch} --no-commit --no-ff`);
-    execSync(`git reset --hard HEAD`);
+    runCommand(`git checkout refs/remotes/origin/conflictbot_tmp_${otherPullRequest.branch}`);
+    runCommand(`git merge ${mainBranch} --no-commit --no-ff`);
+    runCommand(`git reset --hard HEAD`);
 
     try {
       // Attempt to merge other pull request branch in memory without committing or fast-forwarding.
-      execSync(
+      runCommand(
         `git merge refs/remotes/origin/conflictbot_tmp_${pullRequestBranch} --no-commit --no-ff`
       );
 
@@ -205,7 +204,7 @@ async function attemptMerge(otherPullRequest) {
           };
         }
 
-        const output = execSync(
+        const output = runCommand(
           "git diff --name-only --diff-filter=U"
         ).toString();
         const conflictFileNames = output.split("\n").filter(Boolean);
@@ -223,9 +222,9 @@ async function attemptMerge(otherPullRequest) {
     console.error(`Error during merge process: ${error.message}`);
   } finally {
     // Reset any changes.
-    execSync(`git reset --hard HEAD`);
+    runCommand(`git reset --hard HEAD`);
     // Cleanup by deleting temporary refs.
-    execSync(
+    runCommand(
       `git update-ref -d refs/remotes/origin/conflictbot_tmp_${otherPullRequest.branch}`
     );
   }
@@ -234,7 +233,7 @@ async function attemptMerge(otherPullRequest) {
 }
 
 function extractConflictingLineNumbers(otherPullRequestBranch, filePath) {
-  const fileContentWithoutConflicts = execSync(
+  const fileContentWithoutConflicts = runCommand(
     `git show refs/remotes/origin/conflictbot_tmp_${otherPullRequestBranch}:${filePath}`
   ).toString();
 
@@ -288,7 +287,7 @@ function extractConflictingLineNumbers(otherPullRequestBranch, filePath) {
 function cleanup() {
   try {
     const pullRequest = github.context.payload.pull_request;
-    execSync(`git update-ref -d refs/remotes/origin/conflictbot_tmp_${pullRequest.branch}`);
+    runCommand(`git update-ref -d refs/remotes/origin/conflictbot_tmp_${pullRequest.branch}`);
   } catch (e) {
     console.error(`Error during cleanup: ${error.message}`);
     throw error;
