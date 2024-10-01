@@ -1,4 +1,5 @@
 const core = require("@actions/core");
+const { execSync } = require("child_process");
 
 function formatLineNumbers(numbers) {
   if (!numbers || numbers.length === 0) return "";
@@ -46,7 +47,13 @@ function debug(...args) {
   }
 }
 
+function runCommand(cmdString) {
+    // execSync’s default is to discard STDOUT, which we don’t want.
+    return execSync(cmdString, { stdio: "inherit" });
+}
+
 module.exports = {
   debug,
   formatLineNumbers,
+  runCommand,
 };
